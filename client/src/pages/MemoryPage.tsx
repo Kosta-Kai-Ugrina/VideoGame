@@ -38,6 +38,15 @@ const MemoryPage: FC = () => {
   }
 
   return (
+    <div className="bg-black text-red-800">
+      bla
+      <div className="w-[50px] h-[50px] bg-blue-500 text-white">
+        booger aids
+      </div>
+    </div>
+  );
+
+  return (
     <div className="grid">
       {deck.map((card) => (
         <div

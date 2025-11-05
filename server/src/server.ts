@@ -64,7 +64,6 @@ io.on("connection", (socket) => {
 
   socket.on("msg", (raw: ClientToServer) => {
     try {
-      console.log("msg", raw);
       switch (raw.type) {
         case "join": {
           const { roomId } = raw;
@@ -107,6 +106,8 @@ io.on("connection", (socket) => {
 
         case "event": {
           const { roomId, payload } = raw;
+          console.log("get event payload", payload, "and room id", roomId);
+
           if (!roomId || roomId !== socket.data.currentRoom) {
             send({ type: "error", message: "Not in that room" });
             return;

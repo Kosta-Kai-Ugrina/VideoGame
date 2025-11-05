@@ -3,10 +3,19 @@ import { useSocket } from "./useSocket";
 import type { ServerToClient } from "./types";
 
 export default function App() {
-  const { connected, socketId, send } = useSocket();
+  const { socket, connected, socketId, send } = useSocket();
   const [roomId, setRoomId] = useState("lobby-1");
   const [presence, setPresence] = useState(0);
   const [log, setLog] = useState<string[]>([]);
+  const [text, setText] = useState("");
+
+  const handleKeyDown = (e: any) => {
+    if (e.key !== "Enter") return;
+
+    console.log("Sending:", text);
+    send({ type: "event", roomId: roomId, payload: text });
+    setText("");
+  };
 
   const onMsgRef = useRef((m: ServerToClient) => {
     switch (m.type) {
@@ -14,6 +23,8 @@ export default function App() {
         if (m.roomId === roomId) setPresence(m.count);
         break;
       case "event":
+        console.log("got event", m);
+        console.log("my room id", roomId, "msg room id", m.roomId);
         if (m.roomId === roomId)
           pushLog(`event from ${m.from}: ${JSON.stringify(m.payload)}`);
         break;
@@ -24,7 +35,6 @@ export default function App() {
         pushLog(`left ${m.roomId ?? ""}`);
         break;
       case "hello":
-        // socketId handled in hook; keep log for visibility
         pushLog(`hello ${m.id}`);
         break;
       case "error":
@@ -36,14 +46,15 @@ export default function App() {
   function pushLog(s: string) {
     setLog((prev) => {
       const next = [...prev, s];
-      // cap log size to avoid runaway growth in dev
       if (next.length > 500) next.shift();
       return next;
     });
   }
 
-  const subscribe = useMemo(() => {
-    return (e: MessageEvent) => {};
+  useEffect(() => {
+    const handler = (m: ServerToClient) => onMsgRef.current(m);
+    socket.on("msg", handler);
+    return () => void socket.off("msg", handler);
   }, []);
 
   // join on mount or when roomId changes
@@ -100,6 +111,16 @@ export default function App() {
         <div>Players present: {presence}</div>
       </div>
 
+      <div>
+        <input
+          type="text"
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="Type and press Enter"
+        />
+      </div>
+
       <div style={{ marginTop: 16 }}>
         <button
           onClick={() => sendMove("A2->A3")}
@@ -110,6 +131,11 @@ export default function App() {
       </div>
 
       <h2 style={{ marginTop: 24 }}>Log</h2>
+      <>
+        {log.map((m) => (
+          <>{m}</>
+        ))}
+      </>
       <pre
         style={{
           background: "#111",

@@ -1,0 +1,157 @@
+import React, { FC, useEffect, useMemo, useRef, useState } from "react";
+import { useSocket } from "../hooks/useSocket";
+import { ServerToClient } from "../model/socketModel";
+import StatusDot from "../components/StatusDot";
+
+const SocketIoTestPage: FC = () => {
+  const { socket, connected, socketId, send } = useSocket();
+  const [roomId, setRoomId] = useState("lobby-1");
+  const [presence, setPresence] = useState(0);
+  const [log, setLog] = useState<string[]>([]);
+  const [text, setText] = useState("");
+
+  const handleKeyDown = (e: any) => {
+    if (e.key !== "Enter") return;
+
+    console.log("Sending:", text);
+    send({ type: "event", roomId: roomId, payload: text });
+    setText("");
+  };
+
+  const onMsgRef = useRef((m: ServerToClient) => {
+    switch (m.type) {
+      case "presence":
+        if (m.roomId === roomId) setPresence(m.count);
+        break;
+      case "event":
+        console.log("got event", m);
+        console.log("my room id", roomId, "msg room id", m.roomId);
+        if (m.roomId === roomId)
+          pushLog(`event from ${m.from}: ${JSON.stringify(m.payload)}`);
+        break;
+      case "joined":
+        pushLog(`joined ${m.roomId}`);
+        break;
+      case "left":
+        pushLog(`left ${m.roomId ?? ""}`);
+        break;
+      case "hello":
+        pushLog(`hello ${m.id}`);
+        break;
+      case "error":
+        pushLog(`error: ${m.message}`);
+        break;
+    }
+  });
+
+  function pushLog(s: string) {
+    setLog((prev) => {
+      const next = [...prev, s];
+      if (next.length > 500) next.shift();
+      return next;
+    });
+  }
+
+  useEffect(() => {
+    const handler = (m: ServerToClient) => onMsgRef.current(m);
+    socket.on("msg", handler);
+    return () => void socket.off("msg", handler);
+  }, []);
+
+  // join on mount or when roomId changes
+  useEffect(() => {
+    send({ type: "join", roomId });
+    // leave on unmount
+    return () => void send({ type: "leave" });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [roomId]);
+
+  const sendMove = (move: string) => {
+    send({ type: "event", roomId, payload: { move, t: Date.now() } });
+  };
+
+  return (
+    <div
+      style={{
+        fontFamily: "system-ui, sans-serif",
+        margin: 24,
+        lineHeight: 1.4,
+      }}
+    >
+      <h1>Socket.IO Lobby</h1>
+      <div
+        style={{
+          display: "flex",
+          gap: 16,
+          alignItems: "center",
+          flexWrap: "wrap",
+        }}
+      >
+        <StatusDot on={connected} />
+        <div>Socket: {socketId ?? "…"}</div>
+        <div>
+          Room:&nbsp;
+          <input
+            value={roomId}
+            onChange={(e) => setRoomId(e.target.value)}
+            style={{ padding: 6, fontFamily: "inherit" }}
+          />
+          <button
+            onClick={() => send({ type: "join", roomId })}
+            style={{ marginLeft: 8, padding: "6px 10px" }}
+          >
+            Join
+          </button>
+          <button
+            onClick={() => send({ type: "leave" })}
+            style={{ marginLeft: 8, padding: "6px 10px" }}
+          >
+            Leave
+          </button>
+        </div>
+        <div>Players present: {presence}</div>
+      </div>
+
+      <div>
+        <input
+          type="text"
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="Type and press Enter"
+        />
+      </div>
+
+      <div style={{ marginTop: 16 }}>
+        <button
+          onClick={() => sendMove("A2->A3")}
+          style={{ padding: "6px 10px" }}
+        >
+          Send move A2→A3
+        </button>
+      </div>
+
+      <h2 style={{ marginTop: 24 }}>Log</h2>
+      <>
+        {log.map((m) => (
+          <>{m}</>
+        ))}
+      </>
+      <pre
+        style={{
+          background: "#111",
+          color: "#ddd",
+          padding: 12,
+          borderRadius: 6,
+          maxHeight: 300,
+          overflow: "auto",
+          whiteSpace: "pre-wrap",
+        }}
+      >
+        {log.join("\n")}
+      </pre>
+    </div>
+  );
+};
+
+export default SocketIoTestPage;

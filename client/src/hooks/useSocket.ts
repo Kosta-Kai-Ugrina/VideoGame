@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { ClientToServer, ServerToClient } from "./types";
-import { createSocket, SIO } from "./sockets";
+import { createSocket, SIO } from "../utils/sockets";
+import { ClientToServer, ServerToClient } from "../model/socketModel";
 
 export function useSocket() {
   const socketRef = useRef<SIO | null>(null);

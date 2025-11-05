@@ -1,6 +1,9 @@
 // socket.ts
 import { io, Socket } from "socket.io-client";
-import type { ClientToServerEvents, ServerToClientEvents } from "./types";
+import type {
+  ClientToServerEvents,
+  ServerToClientEvents,
+} from "../model/socketModel";
 
 const URL = process.env.REACT_APP_SOCKET_URL ?? "http://localhost:3001";
 

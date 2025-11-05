@@ -21,12 +21,10 @@ const MemoryPage: FC = () => {
     if (newFlipped.length === 2) {
       const [a, b] = newFlipped;
       if (a.value === b.value) {
-        // mark matched
         setDeck((d) =>
           d.map((c) => (c.value === a.value ? { ...c, isMatched: true } : c))
         );
       } else {
-        // flip back after delay
         setTimeout(() => {
           setDeck((d) =>
             d.map((c) => (c.isMatched ? c : { ...c, isFlipped: false }))
@@ -38,29 +36,31 @@ const MemoryPage: FC = () => {
   }
 
   return (
-    <div className="bg-black text-red-800">
-      bla
-      <div className="w-[50px] h-[50px] bg-blue-500 text-white">
-        booger aids
+    <div className="min-h-screen bg-gray-900 flex flex-col items-center justify-center p-8">
+      <h1 className="text-3xl font-bold text-white mb-6">Memory Game</h1>
+      <div className="grid grid-cols-4 gap-4">
+        {deck.map((card) => (
+          <button
+            key={card.id}
+            onClick={() => onFlip(card)}
+            className={`w-24 h-32 rounded-xl transition-transform duration-300 transform ${
+              card.isFlipped || card.isMatched
+                ? "rotate-y-0 bg-white"
+                : "rotate-y-180 bg-blue-700"
+            } flex items-center justify-center shadow-lg`}
+          >
+            {card.isFlipped || card.isMatched ? (
+              <img
+                src={imageMap[card.value]}
+                alt={card.value}
+                className="w-16 h-16 object-contain"
+              />
+            ) : (
+              <div className="w-16 h-16 bg-blue-800 rounded-lg" />
+            )}
+          </button>
+        ))}
       </div>
-    </div>
-  );
-
-  return (
-    <div className="grid">
-      {deck.map((card) => (
-        <div
-          key={card.id}
-          className={`card ${card.isFlipped ? "flipped" : ""}`}
-          onClick={() => onFlip(card)}
-        >
-          {card.isFlipped || card.isMatched ? (
-            <img src={imageMap[card.value]} alt={card.value} />
-          ) : (
-            <div className="back" />
-          )}
-        </div>
-      ))}
     </div>
   );
 };

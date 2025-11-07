@@ -1,0 +1,17 @@
+{
+  "files": {
+    "main.css": "/VideoGame/static/css/main.37c0f5b2.css",
+    "main.js": "/VideoGame/static/js/main.7bc4ae8d.js",
+    "static/media/monke.png": "/VideoGame/static/media/monke.e2aca00339cd57dde647.png",
+    "static/media/penguin.png": "/VideoGame/static/media/penguin.1628e0ba4912affc3dc9.png",
+    "static/media/bis.jpg": "/VideoGame/static/media/bis.f5a532e0cf46d1ba61a5.jpg",
+    "static/media/cow.jpg": "/VideoGame/static/media/cow.25653d813ab99997254c.jpg",
+    "index.html": "/VideoGame/index.html",
+    "main.37c0f5b2.css.map": "/VideoGame/static/css/main.37c0f5b2.css.map",
+    "main.7bc4ae8d.js.map": "/VideoGame/static/js/main.7bc4ae8d.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.37c0f5b2.css",
+    "static/js/main.7bc4ae8d.js"
+  ]
+}

@@ -141,6 +141,18 @@ io.on("connection", (socket) => {
           io.to(s.roomId).emit("msg", { type: "stroke", stroke: s });
           break;
         }
+
+        case "clear": {
+          const { roomId } = raw;
+          if (roomId !== socket.data.currentRoom) {
+            send({ type: "error", message: "Not in that room" });
+            return;
+          }
+          console.log("CLEAR COMMAND ISSUED");
+          strokesByRoom.set(roomId, []); // wipe history
+          io.to(roomId).emit("msg", { type: "clear", roomId });
+          break;
+        }
       }
     } catch {
       send({ type: "error", message: "Malformed message" });

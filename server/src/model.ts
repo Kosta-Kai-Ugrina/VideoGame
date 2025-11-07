@@ -1,4 +1,4 @@
-// types.ts
+// shared
 export type Point = { x: number; y: number };
 export type Stroke = {
   id: string; // uuid on client
@@ -26,12 +26,3 @@ export type ServerToClient =
   | { type: "sync"; roomId: string; strokes: Stroke[] }
   | { type: "clear"; roomId: string }
   | { type: "error"; message: string };
-
-// 👇 Event maps (event name -> handler signature)
-export type ServerToClientEvents = {
-  msg: (m: ServerToClient) => void;
-};
-
-export type ClientToServerEvents = {
-  msg: (m: ClientToServer) => void;
-};

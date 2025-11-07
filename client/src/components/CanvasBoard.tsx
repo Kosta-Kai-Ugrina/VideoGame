@@ -34,7 +34,6 @@ export default function CanvasBoard({ roomId }: { roomId: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // listen server → apply strokes or sync
   useEffect(() => {
     const onMsg = (m: ServerToClient) => {
       if (m.type === "sync" && m.roomId === roomId) {
@@ -44,6 +43,12 @@ export default function CanvasBoard({ roomId }: { roomId: string }) {
       if (m.type === "stroke" && m.stroke.roomId === roomId) {
         strokesRef.current.push(m.stroke);
         drawStroke(m.stroke);
+      }
+      if (m.type === "clear" && m.roomId === roomId) {
+        // 👈 reset
+        strokesRef.current = [];
+        const c = canvasRef.current!;
+        ctx2d().clearRect(0, 0, c.width, c.height);
       }
     };
     socket.on("msg", onMsg);
@@ -146,11 +151,12 @@ export default function CanvasBoard({ roomId }: { roomId: string }) {
         <input
           type="range"
           min={1}
-          max={20}
+          max={200}
           value={width}
           onChange={(e) => setWidth(Number(e.target.value))}
         />
         <span>{width}px</span>
+        <button onClick={() => send({ type: "clear", roomId })}>Clear</button>
       </div>
       <canvas
         ref={canvasRef}

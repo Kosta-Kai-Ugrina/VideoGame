@@ -1,20 +1,10 @@
 import { createServer } from "node:http";
 import { Server } from "socket.io";
+import { ClientToServer, ServerToClient, Stroke } from "./model.js";
 
 // ---- Basic config ----
 const PORT = Number(process.env.PORT ?? 3001);
 const ORIGIN = process.env.CORS_ORIGIN ?? "*"; // set to your web app origin in prod
-
-// shared
-export type Point = { x: number; y: number };
-export type Stroke = {
-  id: string; // uuid on client
-  roomId: string;
-  color: string;
-  width: number;
-  points: Point[]; // collected during a press
-  ts: number;
-};
 
 // ---- Spin up Socket.IO on a bare HTTP server ----
 const httpServer = createServer((_, res) => {
@@ -61,23 +51,6 @@ function pushStroke(s: Stroke) {
   if (list.length > MAX_STROKES) list.shift();
   strokesByRoom.set(s.roomId, list);
 }
-
-// ---- Socket events & typing ----
-type ClientToServer =
-  | { type: "join"; roomId: string }
-  | { type: "leave" }
-  | { type: "event"; roomId: string; payload: unknown }
-  | { type: "stroke"; stroke: Stroke };
-
-type ServerToClient =
-  | { type: "hello"; id: string }
-  | { type: "joined"; roomId: string }
-  | { type: "left"; roomId?: string }
-  | { type: "presence"; roomId: string; count: number }
-  | { type: "event"; roomId: string; from: string; payload: unknown }
-  | { type: "stroke"; stroke: Stroke }
-  | { type: "sync"; roomId: string; strokes: Stroke[] }
-  | { type: "error"; message: string };
 
 io.on("connection", (socket) => {
   // track a single active room per socket (simple lobby semantics)

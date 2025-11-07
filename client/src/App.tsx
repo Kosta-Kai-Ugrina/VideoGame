@@ -5,8 +5,8 @@ import MemoryPage from "./pages/MemoryPage";
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<MemoryPage />} />
-      <Route path="/VideoGame" element={<MemoryPage />} />
+      <Route path="/" element={<SocketIoTestPage />} />
+      <Route path="/VideoGame" element={<SocketIoTestPage />} />
       <Route path="/socket-io-test" element={<SocketIoTestPage />} />
     </Routes>
   );

@@ -5,6 +5,17 @@ import { Server } from "socket.io";
 const PORT = Number(process.env.PORT ?? 3001);
 const ORIGIN = process.env.CORS_ORIGIN ?? "*"; // set to your web app origin in prod
 
+// shared
+export type Point = { x: number; y: number };
+export type Stroke = {
+  id: string; // uuid on client
+  roomId: string;
+  color: string;
+  width: number;
+  points: Point[]; // collected during a press
+  ts: number;
+};
+
 // ---- Spin up Socket.IO on a bare HTTP server ----
 const httpServer = createServer((_, res) => {
   // optional tiny healthcheck
@@ -40,11 +51,23 @@ function leaveRoom(socketId: string, roomId: string) {
   return set.size;
 }
 
+// server additions
+const strokesByRoom = new Map<string, Stroke[]>(); // roomId -> strokes
+const MAX_STROKES = 5000; // cap history
+
+function pushStroke(s: Stroke) {
+  const list = strokesByRoom.get(s.roomId) ?? [];
+  list.push(s);
+  if (list.length > MAX_STROKES) list.shift();
+  strokesByRoom.set(s.roomId, list);
+}
+
 // ---- Socket events & typing ----
 type ClientToServer =
   | { type: "join"; roomId: string }
   | { type: "leave" }
-  | { type: "event"; roomId: string; payload: unknown };
+  | { type: "event"; roomId: string; payload: unknown }
+  | { type: "stroke"; stroke: Stroke };
 
 type ServerToClient =
   | { type: "hello"; id: string }
@@ -52,6 +75,8 @@ type ServerToClient =
   | { type: "left"; roomId?: string }
   | { type: "presence"; roomId: string; count: number }
   | { type: "event"; roomId: string; from: string; payload: unknown }
+  | { type: "stroke"; stroke: Stroke }
+  | { type: "sync"; roomId: string; strokes: Stroke[] }
   | { type: "error"; message: string };
 
 io.on("connection", (socket) => {
@@ -70,6 +95,11 @@ io.on("connection", (socket) => {
           if (typeof roomId !== "string" || roomId.length === 0) {
             send({ type: "error", message: "Invalid roomId" });
             return;
+          }
+
+          {
+            const list = strokesByRoom.get(roomId) ?? [];
+            socket.emit("msg", { type: "sync", roomId, strokes: list });
           }
 
           // leave previous room if any
@@ -118,6 +148,24 @@ io.on("connection", (socket) => {
             from: socket.id,
             payload,
           });
+          break;
+        }
+
+        case "stroke": {
+          const s = raw.stroke;
+          // cheap validation
+          if (
+            !s ||
+            s.roomId !== socket.data.currentRoom ||
+            !Array.isArray(s.points) ||
+            s.points.length < 2
+          ) {
+            send({ type: "error", message: "Bad stroke" });
+            return;
+          }
+          console.log(`receive stroke ${raw.stroke.color}`);
+          pushStroke(s);
+          io.to(s.roomId).emit("msg", { type: "stroke", stroke: s });
           break;
         }
       }

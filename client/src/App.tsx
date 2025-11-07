@@ -7,7 +7,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<VekiStokaPage />} />
-      {/* <Route path="/VideoGame" element={<SocketIoTestPage />} /> */}
+      <Route path="/VideoGame" element={<VekiStokaPage />} />
       {/* <Route path="/socket-io-test" element={<SocketIoTestPage />} /> */}
       {/* <Route path="/veki-stoka" element={<VekiStokaPage />} /> */}
     </Routes>

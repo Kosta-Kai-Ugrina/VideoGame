@@ -6,6 +6,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<MemoryPage />} />
+      <Route path="/VideoGame" element={<MemoryPage />} />
       <Route path="/socket-io-test" element={<SocketIoTestPage />} />
     </Routes>
   );

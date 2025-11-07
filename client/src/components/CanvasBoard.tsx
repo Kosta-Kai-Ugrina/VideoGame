@@ -156,7 +156,7 @@ export default function CanvasBoard({ roomId }: { roomId: string }) {
         ref={canvasRef}
         style={{
           width: "100%",
-          height: 500,
+          height: "100%",
           border: "1px solid #ccc",
           touchAction: "none",
         }}

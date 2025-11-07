@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/VideoGame/static/css/main.71a8e2ce.css",
-    "main.js": "/VideoGame/static/js/main.36f69781.js",
+    "main.js": "/VideoGame/static/js/main.6da33873.js",
     "index.html": "/VideoGame/index.html",
     "main.71a8e2ce.css.map": "/VideoGame/static/css/main.71a8e2ce.css.map",
-    "main.36f69781.js.map": "/VideoGame/static/js/main.36f69781.js.map"
+    "main.6da33873.js.map": "/VideoGame/static/js/main.6da33873.js.map"
   },
   "entrypoints": [
     "static/css/main.71a8e2ce.css",
-    "static/js/main.36f69781.js"
+    "static/js/main.6da33873.js"
   ]
 }
